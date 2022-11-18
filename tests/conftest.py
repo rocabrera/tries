@@ -1,6 +1,11 @@
 import pytest
+from time import time
+from src.loaders import load_data_trie
+from pathlib import Path
+from src.trie import Trie
 
-from trie import Trie
+
+DATA_PATH = Path(__file__).parent.parent
 
 @pytest.fixture(params=[
     ["testtes", "test", "testte"], 
@@ -36,3 +41,18 @@ def trie_with_prefix(request):
 
     return trie
 
+@pytest.fixture()
+def full_trie_with_execution_time():
+
+    trie = Trie()
+    data_folder = Path(__file__).parent.parent / "data"
+
+    start = time()
+    load_data_trie(
+        trie = trie,
+        dataset = data_folder / "words_splitted"
+    )
+    end = time()
+    execution_time = end - start
+
+    return trie, execution_time

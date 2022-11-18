@@ -1,7 +1,7 @@
 from pathlib import Path
 
 DATASET_FILENAME = "words_alpha.txt"
-DATA_PATH = Path(__file__).parent / "data"
+DATA_PATH = Path(__file__).parent.parent / "data"
 DATASET_PATH = DATA_PATH / DATASET_FILENAME
 DATASET_SIZE = 370105
 MAX_SAMPLES_PER_SIZE = 50000
