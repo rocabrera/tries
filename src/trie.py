@@ -1,11 +1,13 @@
 from collections import UserDict
+from src.levenshtein import lev_dist
+from typing import Tuple, Union
 
 class WordNode(UserDict):
     """
     Used to mark a node as a word in the Trie structure.
     """
-    pass
-    
+    def set_word(self, word:str):
+        self.word = word 
 
 class Trie:
     
@@ -25,8 +27,8 @@ class Trie:
             True when the word is correctly inserted.
             False when the word already exists in the structure.
         """
-        
-        if self.find(word):
+        result, _ = self.find(word)
+        if result:
             return False
         
 
@@ -45,13 +47,17 @@ class Trie:
         value = node.get(last_char)   
         self.n_words += 1
         if value is None:
-            node.setdefault(last_char, WordNode())
+            word_node = WordNode()
+            word_node.set_word(word)
+            node.setdefault(last_char, word_node)
         else:
-            node[last_char] = WordNode(node[last_char])
+            word_node = WordNode(node[last_char])
+            word_node.set_word(word)
+            node[last_char] = word_node
             
         return True
-                
-    def find(self, word: str):
+                      
+    def find(self, word: str, correction: bool = False, threshold: int=3) -> Tuple[bool, Union[str,None]]:
         """Retrieve a word in the structure if exists.
         
         Args:
@@ -64,28 +70,65 @@ class Trie:
         
         node = self.root
         
-        matches = []
         
         for char in word:
             
-            value = node.get(char)
+            next_node = node.get(char)
             
-            if value is None:
-                # self.infer_possible_paths()
-                return False
+            # If the character does not exist in the node the word does not exist.
+            if next_node is None:
+                if correction:
+                    possible_matches = self._correct(node)
+                    score, best_word = min(
+                            ((lev_dist(word, possible_word), 
+                              possible_word) for possible_word in possible_matches), 
+                            key=lambda x:x[0])
+                    if score <= threshold:
+                        return (True, best_word)
+                    else:
+                        return (False, word)
+                        
+                    
+                return (False, None)
             
             else:
-                matches.append(char)
-                node = value
+                node = next_node
                 
         if isinstance(node ,WordNode): 
-            return True 
+            return (True, node.word) 
         else: 
-            return False
+            return (False, None)
+        
+    def find_with_correction(self, word:str):
+        
+        result, word = self.find(word, correction=True)
+        
+        if word is not None:
+            return word
+        else:
+            return "NOT_FIXABLE"
+
         
     def __str__(self):
         return str(self.root)
     
-    def infer_possible_paths(self):
-        pass
-       
+    def _correct(self, root_node:dict):
+        
+        possible_matches = []
+                
+        explore_nodes = [root_node]
+        
+        while len(explore_nodes) != 0:
+            
+            node = explore_nodes.pop()
+
+            if isinstance(node, WordNode):
+                possible_matches.append(node.word)   
+                
+            if node is not None:
+
+                next_chars = list(node.keys())
+                next_nodes = [node.get(char) for char in next_chars]
+                explore_nodes.extend(next_nodes)
+                
+        return possible_matches

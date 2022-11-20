@@ -11,7 +11,7 @@ def load_file_trie(trie: Trie, dataset: Path):
 
     with open(dataset) as f:
         while True:
-            # read a single line
+            
             line = f.readline().rstrip('\n')
             if not line:
                 break
