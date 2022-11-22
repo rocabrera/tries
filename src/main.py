@@ -1,26 +1,16 @@
 from trie import Trie
 from loaders import get_meaning
-import json
-
-# Load Trie
-with open("../data/engmix.txt", "r") as f:
-    data = f.read().splitlines()
-
-trie = Trie()
-
-for word in data:
-    trie.insert(word)
-
+from pathlib import Path
 
 # Menu
 MENU_TEXT = """
--------------------------------------------------------
-Correct your text or search for the meaning of a word:
-1 - Search meaning.
-2 - Correct text.
-0 - Exit.
--------------------------------------------------------
-"""
+    -------------------------------------------------------
+    Correct your text or search for the meaning of a word:
+    1 - Search meaning.
+    2 - Correct text.
+    0 - Exit.
+    -------------------------------------------------------
+    """
 
 def search_meaning(word):
     word_to_be_found = trie.find_with_correction(word.lower())
@@ -47,26 +37,39 @@ def correct_text(text):
     """
     print(ANSWER_CORRECT_TEXT)
 
-print(MENU_TEXT)
-choice = input()
 
-while choice != 0:
-    if int(choice) == 1:
-        print("Now enter the word you want to discover the meaning:")
-        word = input()
-        search_meaning(word)
-        print(MENU_TEXT)
-        choice = input()
-    elif int(choice) == 2:
-        print("Now enter the text you want to be corrected:")
-        text = input()
-        correct_text(text)
-        print(MENU_TEXT)
-        choice = input()
-    elif int(choice) != 0:
-        print("Invalid choice, try again.")
-        print(MENU_TEXT)
-        choice = input()
-    else:
-        print("Bye.")
-        break
+DATA_FOLDER = Path(__file__).parent.parent / "data"
+
+if __name__ == '__main__':
+# Load Trie
+    with open(DATA_FOLDER/"engmix.txt", "r") as f:
+        data = f.read().splitlines()
+
+    trie = Trie()
+
+    for word in data:
+        trie.insert(word)
+
+    print(MENU_TEXT)
+    choice = input()
+
+    while choice != 0:
+        if int(choice) == 1:
+            print("Now enter the word you want to discover the meaning:")
+            word = input()
+            search_meaning(word)
+            print(MENU_TEXT)
+            choice = input()
+        elif int(choice) == 2:
+            print("Now enter the text you want to be corrected:")
+            text = input()
+            correct_text(text)
+            print(MENU_TEXT)
+            choice = input()
+        elif int(choice) != 0:
+            print("Invalid choice, try again.")
+            print(MENU_TEXT)
+            choice = input()
+        else:
+            print("Bye.")
+            break

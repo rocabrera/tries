@@ -1,8 +1,11 @@
 import json
 import os
 
-from trie import Trie
+from src.trie import Trie
 from pathlib import Path
+
+DATA_FOLDER = Path(__file__).parent.parent / "data"
+
 
 def load_file_trie(trie: Trie, dataset: Path):
     """Insert words from a file in a Trie Structure
@@ -43,7 +46,7 @@ def get_meaning(word: str):
     """
 
     first_letter = word[0]
-    path_to_db = os.environ.get("AED_DICT_DB_PATH", "../data/dictionary")
+    path_to_db = os.environ.get("AED_DICT_DB_PATH", DATA_FOLDER/"dictionary")
     dict_file = open(os.path.join(path_to_db, f"{first_letter}.json"))
     dictionary_from_fletter = json.load(dict_file)
     meaning = dictionary_from_fletter.get(word)

@@ -1,5 +1,5 @@
 from collections import UserDict
-from levenshtein import lev_dist
+from src.levenshtein import lev_dist
 from typing import Tuple, Union
 
 class WordNode(UserDict):
@@ -57,7 +57,7 @@ class Trie:
 
         return True
 
-    def find(self, word: str, correction: bool = False, threshold: int=3) -> Tuple[bool, Union[str,None]]:
+    def find(self, word: str, correction: bool = False, threshold: int=3, maximum_explore:int = None) -> Tuple[bool, Union[str,None]]:
         """Retrieve a word in the structure if exists.
 
         Args:
@@ -78,7 +78,7 @@ class Trie:
             # If the character does not exist in the node the word does not exist.
             if next_node is None:
                 if correction:
-                    possible_matches = self._correct(node)
+                    possible_matches = self._correct(node, maximum_explore)
                     score, best_word = min(
                             ((lev_dist(word, possible_word),
                               possible_word) for possible_word in possible_matches),
@@ -99,9 +99,9 @@ class Trie:
         else:
             return (False, None)
 
-    def find_with_correction(self, word:str):
+    def find_with_correction(self, word:str, maximum_explore:int = None):
 
-        result, word = self.find(word, correction=True)
+        result, word = self.find(word, correction=True, maximum_explore=maximum_explore)
 
         if word is not None:
             return word
@@ -112,7 +112,7 @@ class Trie:
     def __str__(self):
         return str(self.root)
 
-    def _correct(self, root_node:dict):
+    def _correct(self, root_node:dict, maximum_explore:int = None):
 
         possible_matches = []
 
@@ -131,4 +131,8 @@ class Trie:
                 next_nodes = [node.get(char) for char in next_chars]
                 explore_nodes.extend(next_nodes)
 
+            if maximum_explore is not None:
+                if len(possible_matches) >= maximum_explore:
+                    return possible_matches
+            
         return possible_matches
